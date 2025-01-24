@@ -3,138 +3,146 @@ import java.util.Scanner;
 
 public class Licuadora {
     public static void main(String[] args) {
-        Blender blender = new BasicBlender();
+        LicuadoraBasica licuadora = new LicuadoraBasica();
         Scanner scanner = new Scanner(System.in);
 
-        // Menu de opciones
+        // Menú de opciones
         String menu = "Seleccione una opción:\n"
                     + "1. Encender la licuadora\n"
-                    + "2. Llena la licuadora con lo que se desea licuar\n"
-                    + "3. Incrementa velocidad\n"
-                    + "4. Consulta en qué velocidad está la licuadora\n"
-                    + "5. Consulta si la licuadora está llena\n"
+                    + "2. Llenar la licuadora\n"
+                    + "3. Incrementar velocidad\n"
+                    + "4. Obtener velocidad actual\n"
+                    + "5. Consultar si está llena\n"
                     + "6. Vaciar la licuadora\n"
-                    + "7. Salir";
+                    + "7. Apagar la licuadora\n"
+                    + "8. Salir";
 
-        int option = -1;
+        int opcion = -1;
 
-        // Bucle de licuadora
-        while (option != 7) {
+        // Bucle de la licuadora
+        while (opcion != 8) {
             System.out.println(menu);
-            option = scanner.nextInt();
-            scanner.nextLine();  // Limpiar buffer
+            opcion = scanner.nextInt();
+            scanner.nextLine(); // Limpiar buffer
 
-            // Accion para encender la licuadora
-            if (option == 1) {
-                blender.Encender();
-                System.out.println("La licuadora está encendida.");
-
-            // Accion para llenar la licuadora manualmente escribir los ingredientes
-            } else if (option == 2) {
-                System.out.print("Ingrese el contenido a licuar: ");
-                String content = scanner.nextLine();
-                try {
-                    blender.ingredientes(content); // Agregar contenido a la licuadora
-                    System.out.println("Contenido agregado a la licuadora.");
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
-
-            // Accion para incrementar la velocidad de la licuadora  1 al 10
-            } else if (option == 3) {
-                System.out.println("Introduce la velocidad entre los números 1 a 10: ");
-                int nuevaVelocidad = scanner.nextInt();
-                if (nuevaVelocidad >= 1 && nuevaVelocidad <= 10) {
-                    while (blender.velocidadActual() < nuevaVelocidad) {
-                        blender.incrementarVelocidad();
+            switch (opcion) {
+                case 1:
+                    licuadora.encenderLicuadora();
+                    System.out.println("La licuadora está encendida.");
+                    break;
+                case 2:
+                    System.out.print("Ingrese el contenido a licuar: ");
+                    String contenido = scanner.nextLine();
+                    if (licuadora.llenarLicuadora()) {
+                        System.out.println("Licuadora llena con: " + contenido);
+                    } else {
+                        System.out.println("La licuadora ya está llena.");
                     }
-                    System.out.println("Velocidad incrementada. Velocidad actual: " + blender.velocidadActual());
-                } else {
-                    System.out.println("La velocidad debe estar entre 1 y 10.");
-                }
-            //Revisar la velocidad actual de la licuadora
-            }else if (option == 4) {
-                System.out.println("Velocidad actual: " + blender.velocidadActual());
-
-            //Revisar si la licuadora está llena
-            } else if (option == 5) {
-                System.out.println("¿La licuadora está llena? " + (blender.lleno() ? "Sí" : "No"));
-
-            //Vaciar la licuadora
-            } else if (option == 6) {
-                blender.vaciar();
-                System.out.println("La licuadora ha sido vaciada.");
-
-            //Salir del programa
-            } else if (option == 7) {
-                System.out.println("Saliendo del programa...");
-            } else {
-                System.out.println("Opción inválida.");
+                    break;
+                case 3:
+                    System.out.print("Ingrese la velocidad a incrementar (1-10): ");
+                    int velocidad = scanner.nextInt();
+                    if (licuadora.incrementarVelocidad(velocidad)) {
+                        System.out.println("Velocidad incrementada. Velocidad actual: " + licuadora.obtenerVelocidadActual());
+                    } else {
+                        System.out.println("No se puede incrementar la velocidad. Verifique que la licuadora esté encendida y no exceda la velocidad máxima.");
+                    }
+                    break;
+                case 4:
+                    System.out.println("Velocidad actual: " + licuadora.obtenerVelocidadActual());
+                    break;
+                case 5:
+                    System.out.println("¿La licuadora está llena? " + (licuadora.estaLlena() ? "Sí" : "No"));
+                    break;
+                case 6:
+                    licuadora.vaciarLicuadora();
+                    System.out.println("La licuadora ha sido vaciada.");
+                    break;
+                case 7:
+                    licuadora.apagarLicuadora();
+                    System.out.println("La licuadora está apagada.");
+                    break;
+                case 8:
+                    System.out.println("Saliendo del programa...");
+                    break;
+                default:
+                    System.out.println("Opción inválida.");
             }
         }
 
         scanner.close();
     }
-
-    void Encender() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-}
-interface Blender {
-    void Encender();
-    void ingredientes(String content);
-    void incrementarVelocidad();
-    int velocidadActual();
-    boolean lleno();
-    void vaciar();
 }
 
-class BasicBlender implements Blender {
-    private boolean isOn = false;
+interface LicuadoraInterface {
+    public boolean encenderLicuadora();
+    public boolean apagarLicuadora();
+    public boolean llenarLicuadora();
+    public boolean vaciarLicuadora();
+    public boolean incrementarVelocidad(int velocidad);
+    public int obtenerVelocidadActual();
+    public boolean estaLlena();
+}
+
+class LicuadoraBasica implements LicuadoraInterface {
+    private boolean encendida = false;
     private int velocidadActual = 0;
-    private String content = null;
+    private boolean llena = false;
 
     @Override
-    public void Encender() {
-        isOn = true;
+    public boolean encenderLicuadora() {
+        if (!encendida) {
+            encendida = true;
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void ingredientes(String content) {
-        if (!isOn) {
-            throw new IllegalStateException("La licuadora debe estar encendida para agregar contenido.");
+    public boolean apagarLicuadora() {
+        if (encendida) {
+            encendida = false;
+            velocidadActual = 0;
+            return true;
         }
-        this.content = content;
+        return false;
     }
 
     @Override
-    public void incrementarVelocidad() {
-        if (!isOn) {
-            throw new IllegalStateException("La licuadora debe estar encendida para aumentar la velocidad.");
+    public boolean llenarLicuadora() {
+        if (!llena) {
+            llena = true;
+            return true;
         }
-        if (content == null) {
-            throw new IllegalStateException("La licuadora no puede funcionar vacía.");
-        }
-        if (velocidadActual < 10) {
-            velocidadActual++;
-        } else {
-            throw new IllegalStateException("La velocidad máxima es 10.");
-        }
+        return false;
     }
 
     @Override
-    public int velocidadActual() {
+    public boolean vaciarLicuadora() {
+        if (llena) {
+            llena = false;
+            velocidadActual = 0;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean incrementarVelocidad(int velocidad) {
+        if (encendida && llena && velocidadActual + velocidad <= 10) {
+            velocidadActual += velocidad;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int obtenerVelocidadActual() {
         return velocidadActual;
     }
 
     @Override
-    public boolean lleno() {
-        return content != null;
-    }
-
-    @Override
-    public void vaciar() {
-        content = null;
-        velocidadActual = 0;
+    public boolean estaLlena() {
+        return llena;
     }
 }
