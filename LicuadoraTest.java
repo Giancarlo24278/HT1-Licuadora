@@ -1,78 +1,74 @@
 package com.example;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class BasicBlenderTest {
+class LicuadoraTest {
 
-    private BasicBlender blender;
+    LicuadoraBasica licuadora = new LicuadoraBasica();
 
     @BeforeEach
     void setUp() {
-        blender = new BasicBlender();
+    
     }
 
     @Test
-    void testEncender() {
-        blender.Encender();
-        assertTrue(blender.lleno() || !blender.lleno(), "La licuadora debería poder encender sin errores.");
+    void testEncenderLicuadora() {
+        assertTrue(licuadora.encenderLicuadora());
+        assertFalse(licuadora.encenderLicuadora(), "La licuadora ya debería estar encendida.");
     }
 
     @Test
-    void testAgregarIngredientesCuandoEncendida() {
-        blender.Encender();
-        assertDoesNotThrow(() -> blender.ingredientes("Frutas"), "No debería lanzar excepción cuando está encendida.");
+    void testApagarLicuadora() {
+        licuadora.encenderLicuadora();
+        assertTrue(licuadora.apagarLicuadora());
+        assertFalse(licuadora.apagarLicuadora(), "La licuadora ya debería estar apagada.");
     }
 
     @Test
-    void testAgregarIngredientesSinEncender() {
-        Exception exception = assertThrows(IllegalStateException.class, () -> blender.ingredientes("Frutas"));
-        assertEquals("La licuadora debe estar encendida para agregar contenido.", exception.getMessage());
+    void testLlenarLicuadora() {
+        assertTrue(licuadora.llenarLicuadora());
+        assertFalse(licuadora.llenarLicuadora(), "La licuadora ya debería estar llena.");
     }
 
     @Test
-    void testIncrementarVelocidadCuandoEncendidaYLlena() {
-        blender.Encender();
-        blender.ingredientes("Frutas");
-        blender.incrementarVelocidad();
-        assertEquals(1, blender.velocidadActual(), "La velocidad debería ser 1 después de incrementarla una vez.");
+    void testVaciarLicuadora() {
+        licuadora.llenarLicuadora();
+        assertTrue(licuadora.vaciarLicuadora());
+        assertFalse(licuadora.vaciarLicuadora(), "La licuadora ya debería estar vacía.");
     }
 
     @Test
-    void testIncrementarVelocidadSinEncender() {
-        Exception exception = assertThrows(IllegalStateException.class, blender::incrementarVelocidad);
-        assertEquals("La licuadora debe estar encendida para aumentar la velocidad.", exception.getMessage());
+    void testIncrementarVelocidad() {
+        licuadora.encenderLicuadora();
+        licuadora.llenarLicuadora();
+
+        assertTrue(licuadora.incrementarVelocidad(3), "Debería ser posible incrementar la velocidad.");
+        assertEquals(3, licuadora.obtenerVelocidadActual());
+
+        assertTrue(licuadora.incrementarVelocidad(2), "Debería ser posible incrementar la velocidad.");
+        assertEquals(5, licuadora.obtenerVelocidadActual());
+
+        assertFalse(licuadora.incrementarVelocidad(6), "No debería ser posible superar la velocidad máxima de 10.");
+        assertEquals(5, licuadora.obtenerVelocidadActual());
     }
 
     @Test
-    void testIncrementarVelocidadCuandoVacia() {
-        blender.Encender();
-        Exception exception = assertThrows(IllegalStateException.class, blender::incrementarVelocidad);
-        assertEquals("La licuadora no puede funcionar vacía.", exception.getMessage());
+    void testObtenerVelocidadActual() {
+        assertEquals(0, licuadora.obtenerVelocidadActual(), "La velocidad inicial debería ser 0.");
+        licuadora.encenderLicuadora();
+        licuadora.llenarLicuadora();
+        licuadora.incrementarVelocidad(5);
+        assertEquals(5, licuadora.obtenerVelocidadActual(), "La velocidad debería ser 5 después del incremento.");
     }
 
     @Test
-    void testIncrementarVelocidadAlMaximo() {
-        blender.Encender();
-        blender.ingredientes("Frutas");
-        for (int i = 0; i < 10; i++) {
-            blender.incrementarVelocidad();
-        }
-        Exception exception = assertThrows(IllegalStateException.class, blender::incrementarVelocidad);
-        assertEquals("La velocidad máxima es 10.", exception.getMessage());
-    }
-
-    @Test
-    void testVaciar() {
-        blender.Encender();
-        blender.ingredientes("Frutas");
-        blender.vaciar();
-        assertFalse(blender.lleno(), "La licuadora debería estar vacía después de vaciarla.");
-        assertEquals(0, blender.velocidadActual(), "La velocidad debería ser 0 después de vaciarla.");
+    void testEstaLlena() {
+        assertFalse(licuadora.estaLlena(), "La licuadora debería estar vacía inicialmente.");
+        licuadora.llenarLicuadora();
+        assertTrue(licuadora.estaLlena(), "La licuadora debería estar llena.");
     }
 }
